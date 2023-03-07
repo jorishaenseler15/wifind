@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
@@ -6,8 +7,12 @@ import 'package:wifind/AddMarkerScreen.dart';
 
 //used for distance calculation
 import 'package:geolocator/geolocator.dart';
+import 'package:wifind/service/NotificationWiFind.dart';
 
-void main() {
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+void main() async{
   runApp(const MyApp());
 }
 
@@ -33,6 +38,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+
   final List<Marker> _markers = [];
   final MapController _mapController = MapController();
 
@@ -45,6 +51,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _checkLocationPermissions();
+    NotificationWiFind.initialize(flutterLocalNotificationsPlugin);
   }
 
   Future<void> _checkLocationPermissions() async {
@@ -82,25 +89,10 @@ class _MapScreenState extends State<MapScreen> {
       );
       print(distance);
       if (distance < 50) {
-        _showMarkerAlert(marker);
+        //use marker for more infos
+        NotificationWiFind.showBigTextNotification(title: "New message title", body: "Your long body", fln: flutterLocalNotificationsPlugin);
       }
     }
-  }
-
-  Future<void> _showMarkerAlert(Marker marker) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("You're near a marker!"),
-        content: Text("You're within 50m of a marker at ${marker.point}"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _addMarker() async {
