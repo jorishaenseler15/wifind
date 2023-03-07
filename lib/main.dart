@@ -17,21 +17,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         useMaterial3: true,
       ),
       home: MapScreen(),
@@ -45,20 +30,41 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  List<Marker> _markers = [];
+  final List<Marker> _markers = [];
+  final MapController _mapController = MapController();
 
-  late LatLng _currentLocation;
+  final Location _location = Location();
+  bool? _serviceEnabled;
+  PermissionStatus? _permissionStatus;
+  LocationData? _locationData;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _checkLocationPermissions();
   }
 
-  Future<void> _getCurrentLocation() async {
-    LocationData locationData = await Location().getLocation();
-    setState(() {
-      _currentLocation = LatLng(locationData.latitude!, locationData.longitude!);
+  Future<void> _checkLocationPermissions() async {
+    _serviceEnabled = await _location.serviceEnabled();
+    if (!_serviceEnabled!) {
+      _serviceEnabled = await _location.requestService();
+      if (!_serviceEnabled!) {
+        return;
+      }
+    }
+
+    _permissionStatus = await _location.hasPermission();
+    if (_permissionStatus == PermissionStatus.denied) {
+      _permissionStatus = await _location.requestPermission();
+      if (_permissionStatus != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _location.onLocationChanged.listen((LocationData currentLocation) {
+      setState(() {
+        _locationData = currentLocation;
+      });
     });
   }
 
@@ -67,37 +73,76 @@ class _MapScreenState extends State<MapScreen> {
       context,
       MaterialPageRoute(builder: (context) => AddMarkerScreen()),
     );
-    setState(() {
-      _markers.add(
-        Marker(
-          width: 80.0,
-          height: 80.0,
-          point: selectedLocation,
-          builder: (ctx) => const Icon(Icons.location_pin),
-        ),
+    if (selectedLocation != null) {
+      setState(() {
+        _markers.add(
+          Marker(
+            width: 80.0,
+            height: 80.0,
+            point: selectedLocation,
+            builder: (ctx) => const Icon(Icons.location_pin),
+          ),
+        );
+      });
+    }
+  }
+
+  void _centerMapOnLocation() {
+    if (_locationData != null) {
+      _mapController.move(
+        LatLng(_locationData!.latitude!, _locationData!.longitude!),
+        _mapController.zoom,
       );
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FlutterMap(
-        options: MapOptions(
-          center: LatLng(0, 0),
-          zoom: 13,
-        ),
+      body: _locationData == null
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                center:
+                    LatLng(_locationData!.latitude!, _locationData!.longitude!),
+                zoom: 13,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                ),
+                MarkerLayer(markers: _markers),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      width: 80.0,
+                      height: 80.0,
+                      point: LatLng(
+                          _locationData!.latitude!, _locationData!.longitude!),
+                      builder: (ctx) => const Icon(Icons.person),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.jorishaenseler.wifind',
+          FloatingActionButton(
+            onPressed: _centerMapOnLocation,
+            child: const Icon(Icons.center_focus_strong_outlined),
           ),
-          MarkerLayer(markers: _markers)
+          const SizedBox(
+            height: 16,
+          ),
+          FloatingActionButton(
+            onPressed: _addMarker,
+            child: const Icon(Icons.add),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addMarker,
-        child: const Icon(Icons.add),
       ),
     );
   }
