@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'AddMarkerScreen.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -37,21 +39,50 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  List<Marker> _markers = [];
+
+  Future<void> _addMarker() async {
+    LatLng selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddMarkerScreen()),
+    );
+    setState(() {
+      _markers.add(
+        Marker(
+          width: 80.0,
+          height: 80.0,
+          point: selectedLocation,
+          builder: (ctx) => const Icon(Icons.location_pin),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FlutterMap(
         options: MapOptions(
           center: LatLng(0, 0),
-          zoom: 9.2,
+          zoom: 13,
         ),
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.example.app',
+            userAgentPackageName: 'com.jorishaenseler.wifind',
           ),
+          MarkerLayer(markers: _markers)
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addMarker,
+        child: Icon(Icons.add),
       ),
     );
   }
