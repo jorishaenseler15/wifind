@@ -4,6 +4,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:wifind/AddMarkerScreen.dart';
 
+//used for distance calculation
+import 'package:geolocator/geolocator.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -65,7 +68,39 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _locationData = currentLocation;
       });
+      _checkForMarkers();
     });
+  }
+
+  Future<void> _checkForMarkers() async {
+    for (Marker marker in _markers) {
+      double distance = await Geolocator.distanceBetween(
+        _locationData!.latitude!,
+        _locationData!.longitude!,
+        marker.point.latitude,
+        marker.point.longitude,
+      );
+      print(distance);
+      if (distance < 50) {
+        _showMarkerAlert(marker);
+      }
+    }
+  }
+
+  Future<void> _showMarkerAlert(Marker marker) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("You're near a marker!"),
+        content: Text("You're within 50m of a marker at ${marker.point}"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _addMarker() async {
