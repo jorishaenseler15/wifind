@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
-import 'AddMarkerScreen.dart';
+import 'package:location/location.dart';
+import 'package:wifind/AddMarkerScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,6 +47,21 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   List<Marker> _markers = [];
 
+  late LatLng _currentLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    LocationData locationData = await Location().getLocation();
+    setState(() {
+      _currentLocation = LatLng(locationData.latitude!, locationData.longitude!);
+    });
+  }
+
   Future<void> _addMarker() async {
     LatLng selectedLocation = await Navigator.push(
       context,
@@ -82,7 +97,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addMarker,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
