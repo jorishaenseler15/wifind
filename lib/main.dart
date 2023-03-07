@@ -52,6 +52,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _checkLocationPermissions();
     NotificationWiFind.initialize(flutterLocalNotificationsPlugin);
+    NotificationWiFind.showBigTextNotification(title: "New message title", body: "Your long body", fln: flutterLocalNotificationsPlugin);
   }
 
   Future<void> _checkLocationPermissions() async {
@@ -88,7 +89,7 @@ class _MapScreenState extends State<MapScreen> {
         marker.point.longitude,
       );
       print(distance);
-      if (distance < 50) {
+      if (distance < 10918288) {
         //use marker for more infos
         NotificationWiFind.showBigTextNotification(title: "New message title", body: "Your long body", fln: flutterLocalNotificationsPlugin);
       }
