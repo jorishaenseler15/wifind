@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wifind/screens/WiFindHomeScreen.dart';
 
-
-
-
 void main() async {
   runApp(const MyApp());
 }

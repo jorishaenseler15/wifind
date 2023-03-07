@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:location/location.dart';
 
 class AddWifiScreen extends StatefulWidget {
+  AddWifiScreen({required LocationData locationData}): _locationData = locationData;
+
+  LocationData _locationData;
+
   @override
   _AddWifiScreenState createState() => _AddWifiScreenState();
 }
@@ -24,7 +29,8 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
               height: 400,
               child: FlutterMap(
                 options: MapOptions(
-                  center: LatLng(0, 0),
+                  center: LatLng(widget._locationData.latitude!,
+                      widget._locationData.longitude!),
                   zoom: 13,
                   onTap: _selectLocation,
                 ),

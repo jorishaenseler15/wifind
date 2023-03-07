@@ -82,7 +82,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
   Future<void> _addMarker() async {
     LatLng selectedLocation = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddWifiScreen()),
+      MaterialPageRoute(builder: (context) => AddWifiScreen(locationData: _locationData!,)),
     );
     if (selectedLocation != null) {
       setState(() {
