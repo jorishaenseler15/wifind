@@ -30,6 +30,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
   bool? _serviceEnabled;
   PermissionStatus? _permissionStatus;
   LocationData? _locationData;
+  String errorInformation = "";
 
   @override
   void initState() {
@@ -43,18 +44,23 @@ class _WiFindScreenState extends State<WiFindScreen> {
     if (!_serviceEnabled!) {
       _serviceEnabled = await _location.requestService();
       if (!_serviceEnabled!) {
+        setState(() {
+          errorInformation = "Service could not been enabled.";
+        });
         return;
       }
     }
-
     _permissionStatus = await _location.hasPermission();
     if (_permissionStatus == PermissionStatus.denied) {
       _permissionStatus = await _location.requestPermission();
       if (_permissionStatus != PermissionStatus.granted) {
+        setState(() {
+          errorInformation =
+              "Enable location otherwise you will only see this spinning circle :)";
+        });
         return;
       }
     }
-
     _location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
         _locationData = currentLocation;
@@ -106,8 +112,31 @@ class _WiFindScreenState extends State<WiFindScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _locationData == null
-          ? const Center(
-              child: CircularProgressIndicator(),
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(
+                      height: 45,
+                    ),
+                    errorInformation.length > 1
+                        ? Text(
+                            errorInformation,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.red),
+                          )
+                        : const Text(
+                            "Wait until map is initialized",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.blue),
+                          )
+                  ],
+                ),
+              ),
             )
           : Stack(children: <Widget>[
               FlutterMap(
