@@ -30,3 +30,6 @@ flutter build apk
 
 ## Repo link
 
+Here is the repository link:
+
+[Repository](https://github.com/jorishaenseler15/wifind)

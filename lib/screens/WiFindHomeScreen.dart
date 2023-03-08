@@ -30,7 +30,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
   bool? _serviceEnabled;
   PermissionStatus? _permissionStatus;
   LocationData? _locationData;
-  String errorInformation = "";
+  String _errorInformation = "";
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
       _serviceEnabled = await _location.requestService();
       if (!_serviceEnabled!) {
         setState(() {
-          errorInformation = "Service could not been enabled.";
+          _errorInformation = "Service could not been enabled.";
         });
         return;
       }
@@ -55,7 +55,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
       _permissionStatus = await _location.requestPermission();
       if (_permissionStatus != PermissionStatus.granted) {
         setState(() {
-          errorInformation =
+          _errorInformation =
               "Enable location otherwise you will only see this spinning circle :)";
         });
         return;
@@ -123,9 +123,9 @@ class _WiFindScreenState extends State<WiFindScreen> {
                     const SizedBox(
                       height: 45,
                     ),
-                    errorInformation.length > 1
+                    _errorInformation.length > 1
                         ? Text(
-                            errorInformation,
+                            _errorInformation,
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: Colors.red),
                           )
