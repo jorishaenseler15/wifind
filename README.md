@@ -8,6 +8,13 @@ Weiter hat die Map eine Clusterfunktion, welche Wifis welche nahe zueinander sin
 
 ## Getting Started
 
+- Execute the apk
+- normally it asks for the permissions and it works
+
+but sometimes:
+
+__Be aware that if the application does not asks for the permission that you have to set it manually in the settings (you see that if it keeps displaying the Circle and the text "map initializing")__
+
 To run the Flutter App execute:
 
 ```
