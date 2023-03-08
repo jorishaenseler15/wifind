@@ -3,25 +3,26 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:wifind/model/WiFindSpot.dart';
 import 'package:wifind/screens/AddWifiScreen.dart';
 
 //used for distance calculation
 import 'package:geolocator/geolocator.dart';
 import 'package:wifind/service/NotificationWiFind.dart';
-
+import 'package:wifind/widgets/CustomMarker.dart';
 
 class WiFindScreen extends StatefulWidget {
   WiFindScreen({super.key});
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   @override
   State<WiFindScreen> createState() => _WiFindScreenState();
 }
 
 class _WiFindScreenState extends State<WiFindScreen> {
-  final List<Marker> _markers = [];
+  final List<WiFindSpot> _wiFindSpots = [];
   final MapController _mapController = MapController();
 
   final Location _location = Location();
@@ -62,43 +63,33 @@ class _WiFindScreenState extends State<WiFindScreen> {
   }
 
   Future<void> _checkForMarkers() async {
-    for (Marker marker in _markers) {
+    for (WiFindSpot wiFindSpot in _wiFindSpots) {
       double distance = await Geolocator.distanceBetween(
         _locationData!.latitude!,
         _locationData!.longitude!,
-        marker.point.latitude,
-        marker.point.longitude,
+        wiFindSpot.getPoint.latitude,
+        wiFindSpot.getPoint.longitude,
       );
-      print(distance);
       if (distance < 50) {
         NotificationWiFind.showBigTextNotification(
             title: "WiFind",
-            body: "The Wifi SBB-Free is near you!",
+            body: "The Wifi '${wiFindSpot.getWifiName}' is near you!",
             fln: widget.flutterLocalNotificationsPlugin);
       }
     }
   }
 
   Future<void> _addMarker() async {
-    LatLng selectedLocation = await Navigator.push(
+    WiFindSpot wiFindSpot = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddWifiScreen(locationData: _locationData!,)),
+      MaterialPageRoute(
+          builder: (context) => AddWifiScreen(
+                locationData: _locationData!,
+              )),
     );
-    if (selectedLocation != null) {
-      setState(() {
-        _markers.add(
-          Marker(
-            width: 80.0,
-            height: 80.0,
-            point: selectedLocation,
-            builder: (ctx) => const Icon(
-              Icons.wifi,
-              color: Colors.blue,
-            ),
-          ),
-        );
-      });
-    }
+    setState(() {
+      _wiFindSpots.add(wiFindSpot);
+    });
   }
 
   void _centerMapOnLocation() {
@@ -130,16 +121,13 @@ class _WiFindScreenState extends State<WiFindScreen> {
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   ),
-                  MarkerLayer(markers: _markers),
+                  MarkerLayer(
+                      markers: _wiFindSpots
+                          .map((wifiSpot) => wifiSpot.getMarker)
+                          .toList()),
                   MarkerLayer(
                     markers: [
-                      Marker(
-                        width: 100.0,
-                        height: 100.0,
-                        point: LatLng(_locationData!.latitude!,
-                            _locationData!.longitude!),
-                        builder: (ctx) => const Icon(Icons.person),
-                      ),
+                      buildPersonMarker(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
                     ],
                   ),
                 ],
