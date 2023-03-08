@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+/// Created with help from ChatGPT and this Webpage: https://www.dbestech.com/tutorials/flutter-local-notifications
 class NotificationWiFind {
   static Future initialize(
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
