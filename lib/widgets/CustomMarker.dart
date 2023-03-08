@@ -28,9 +28,9 @@ Marker buildWifiMarker(LatLng point, Color wifiColor) {
 
 Marker buildCustomMarker(double width, double height, LatLng point, Icon icon) {
   return Marker(
-    width: width,
-    height: height,
-    point: point,
-    builder: (ctx) => icon,
-  );
+      width: width,
+      height: height,
+      point: point,
+      builder: (ctx) => icon,
+      anchorPos: AnchorPos.align(AnchorAlign.center));
 }

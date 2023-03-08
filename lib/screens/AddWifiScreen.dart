@@ -22,7 +22,7 @@ class AddWifiScreen extends StatefulWidget {
 
 class _AddWifiScreenState extends State<AddWifiScreen> {
   LatLng? _selectedLocation;
-  final String _wifiName = '';
+  String _wifiName = '';
 
   final _controller = TextEditingController();
 
@@ -58,7 +58,7 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
                 errorText: _errorText,
               ),
               controller: _controller,
-              onChanged: (text) => setState(() => _wifiName),
+              onChanged: (text) => setState(() => _wifiName = text),
             ),
             const SizedBox(height: 40),
             Container(
@@ -98,7 +98,7 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
                           RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
                   ))),
-                  onPressed: _submitLocation,
+                  onPressed: _submitWiFindSpot,
                   child: const Text("Add Marker"),
                 ),
               ),
@@ -111,13 +111,11 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
 
   void _selectLocation(_, LatLng location) {
     setState(() {
-      print(_filledOut);
       _selectedLocation = location;
-      print(_filledOut);
     });
   }
 
-  void _submitLocation() {
+  void _submitWiFindSpot() {
     if (_selectedLocation != null) {
       WiFindSpot newLocationWiFindSpot = WiFindSpot(
           _wifiName,

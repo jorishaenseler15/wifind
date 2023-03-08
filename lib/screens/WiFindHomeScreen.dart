@@ -10,6 +10,7 @@ import 'package:wifind/screens/AddWifiScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:wifind/service/NotificationWiFind.dart';
 import 'package:wifind/widgets/CustomMarker.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 
 class WiFindScreen extends StatefulWidget {
   WiFindScreen({super.key});
@@ -71,6 +72,8 @@ class _WiFindScreenState extends State<WiFindScreen> {
         wiFindSpot.getPoint.longitude,
       );
       if (distance < 50) {
+        print("notification should be sent");
+        print(wiFindSpot.getWifiName);
         NotificationWiFind.showBigTextNotification(
             title: "WiFind",
             body: "The Wifi '${wiFindSpot.getWifiName}' is near you!",
@@ -88,6 +91,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
               )),
     );
     setState(() {
+      print(wiFindSpot.getWifiName);
       _wiFindSpots.add(wiFindSpot);
     });
   }
@@ -127,23 +131,50 @@ class _WiFindScreenState extends State<WiFindScreen> {
                           .toList()),
                   MarkerLayer(
                     markers: [
-                      buildPersonMarker(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
+                      buildPersonMarker(LatLng(
+                          _locationData!.latitude!, _locationData!.longitude!)),
                     ],
+                  ),
+                  MarkerClusterLayerWidget(
+                    options: MarkerClusterLayerOptions(
+                      maxClusterRadius: 45,
+                      size: const Size(40, 40),
+                      anchor: AnchorPos.align(AnchorAlign.center),
+                      fitBoundsOptions: const FitBoundsOptions(
+                        padding: EdgeInsets.all(50),
+                        maxZoom: 15,
+                      ),
+                      markers: _wiFindSpots
+                          .map((wifiSpot) => wifiSpot.getMarker)
+                          .toList(),
+                      builder: (context, markers) {
+                        return Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.blue),
+                          child: Center(
+                            child: Text(
+                              markers.length.toString(),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-              Positioned(
-                left: 30,
-                bottom: 50,
-                child: FloatingActionButton(
-                  onPressed: _centerMapOnLocation,
-                  child: const Icon(Icons.center_focus_strong_outlined),
-                ),
-              )
             ]),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          FloatingActionButton(
+            onPressed: _centerMapOnLocation,
+            child: const Icon(Icons.center_focus_strong_outlined),
+          ),
+          SizedBox(
+            height: 20,
+          ),
           FloatingActionButton(
             onPressed: _addMarker,
             child: const Icon(Icons.add),
