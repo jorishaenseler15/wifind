@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,10 +10,10 @@ import 'package:wifind/widgets/CustomMarker.dart';
 import 'package:wifind/widgets/GrayedOut.dart';
 
 class AddWifiScreen extends StatefulWidget {
-  AddWifiScreen({required LocationData locationData})
+  const AddWifiScreen({super.key, required LocationData locationData})
       : _locationData = locationData;
 
-  LocationData _locationData;
+  final LocationData _locationData;
 
   @override
   _AddWifiScreenState createState() => _AddWifiScreenState();
@@ -40,7 +39,7 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add WiFi"),
+        title: const Text("Add WiFi"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -61,7 +60,7 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
               onChanged: (text) => setState(() => _wifiName = text),
             ),
             const SizedBox(height: 40),
-            Container(
+            SizedBox(
               height: 400,
               child: FlutterMap(
                 options: MapOptions(

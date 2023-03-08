@@ -65,15 +65,13 @@ class _WiFindScreenState extends State<WiFindScreen> {
 
   Future<void> _checkForMarkers() async {
     for (WiFindSpot wiFindSpot in _wiFindSpots) {
-      double distance = await Geolocator.distanceBetween(
+      double distance = Geolocator.distanceBetween(
         _locationData!.latitude!,
         _locationData!.longitude!,
         wiFindSpot.getPoint.latitude,
         wiFindSpot.getPoint.longitude,
       );
       if (distance < 50) {
-        print("notification should be sent");
-        print(wiFindSpot.getWifiName);
         NotificationWiFind.showBigTextNotification(
             title: "WiFind",
             body: "The Wifi '${wiFindSpot.getWifiName}' is near you!",
@@ -91,7 +89,6 @@ class _WiFindScreenState extends State<WiFindScreen> {
               )),
     );
     setState(() {
-      print(wiFindSpot.getWifiName);
       _wiFindSpots.add(wiFindSpot);
     });
   }
@@ -172,7 +169,7 @@ class _WiFindScreenState extends State<WiFindScreen> {
             onPressed: _centerMapOnLocation,
             child: const Icon(Icons.center_focus_strong_outlined),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           FloatingActionButton(
