@@ -16,10 +16,10 @@ class AddWifiScreen extends StatefulWidget {
   final LocationData _locationData;
 
   @override
-  _AddWifiScreenState createState() => _AddWifiScreenState();
+  AddWifiScreenState createState() => AddWifiScreenState();
 }
 
-class _AddWifiScreenState extends State<AddWifiScreen> {
+class AddWifiScreenState extends State<AddWifiScreen> {
   LatLng? _selectedLocation;
   String _wifiName = '';
 
