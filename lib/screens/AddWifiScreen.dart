@@ -5,7 +5,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 import 'package:wifind/model/WiFindSpot.dart';
+import 'package:wifind/service/ColorGenerator.dart';
 import 'package:wifind/widgets/CustomMarker.dart';
+
+import 'package:wifind/widgets/GrayedOut.dart';
 
 class AddWifiScreen extends StatefulWidget {
   AddWifiScreen({required LocationData locationData})
@@ -19,7 +22,19 @@ class AddWifiScreen extends StatefulWidget {
 
 class _AddWifiScreenState extends State<AddWifiScreen> {
   LatLng? _selectedLocation;
-  String wifiName = '';
+  final String _wifiName = '';
+
+  final _controller = TextEditingController();
+
+  String? get _errorText {
+    final text = _controller.value.text;
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    return null;
+  }
+
+  bool get _filledOut => _errorText != null || _selectedLocation == null;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +44,7 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: ListView(
           children: <Widget>[
             const Icon(
               Icons.wifi,
@@ -37,17 +52,16 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
               color: Colors.blue,
             ),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Wifi Name',
                 hintText: 'Enter a name',
+                errorText: _errorText,
               ),
-              onChanged: (value) {
-                setState(() {
-                  wifiName = value;
-                });
-              },
+              controller: _controller,
+              onChanged: (text) => setState(() => _wifiName),
             ),
-            SizedBox(
+            const SizedBox(height: 40),
+            Container(
               height: 400,
               child: FlutterMap(
                 options: MapOptions(
@@ -72,11 +86,22 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
               ),
             ),
             const SizedBox(
-              height: 20,
+              height: 40,
             ),
-            ElevatedButton(
-              onPressed: _submitLocation,
-              child: const Text("Add Marker"),
+            GrayedOut(
+              grayedOut: _filledOut,
+              child: SizedBox(
+                height: 60,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                  ))),
+                  onPressed: _submitLocation,
+                  child: const Text("Add Marker"),
+                ),
+              ),
             ),
           ],
         ),
@@ -86,17 +111,18 @@ class _AddWifiScreenState extends State<AddWifiScreen> {
 
   void _selectLocation(_, LatLng location) {
     setState(() {
+      print(_filledOut);
       _selectedLocation = location;
+      print(_filledOut);
     });
   }
 
   void _submitLocation() {
     if (_selectedLocation != null) {
-      print(wifiName);
       WiFindSpot newLocationWiFindSpot = WiFindSpot(
-        wifiName,
-        buildWifiMarker(_selectedLocation!, Colors.primaries[Random().nextInt(Colors.primaries.length)])
-      );
+          _wifiName,
+          buildWifiMarker(_selectedLocation!,
+              ColorGenerator.getColor()));
       Navigator.pop(context, newLocationWiFindSpot);
     }
   }
